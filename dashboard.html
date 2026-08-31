@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard · Biblioteca</title>
+  <meta name="description" content="Panel general de la biblioteca: libros, préstamos y usuarios." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/forms.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+</head>
+<body>
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__brand">
+        <span class="sidebar__brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z" />
+            <path d="M9 7h6M9 11h6" />
+          </svg>
+        </span>
+        <span class="sidebar__brand-text">Biblioteca<span>Sistema de gestión</span></span>
+      </div>
+
+      <nav class="sidebar__nav" aria-label="Navegación principal">
+        <a class="sidebar__link" href="dashboard.html" aria-current="page">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+          Dashboard
+        </a>
+        <a class="sidebar__link" href="libros.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
+          Libros
+        </a>
+        <a class="sidebar__link" href="usuarios.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Usuarios
+        </a>
+        <a class="sidebar__link" href="prestamos.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
+          Préstamos
+        </a>
+      </nav>
+
+      <div class="sidebar__footer">
+        <button class="theme-toggle" data-theme-toggle type="button" aria-pressed="false">
+          <span class="theme-toggle__icons">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+          </span>
+          <span data-theme-label>Modo claro</span>
+        </button>
+        <p style="margin-top:10px;font-size:11px;color:var(--text-tertiary)">© <span data-anio-actual></span> Biblioteca</p>
+      </div>
+    </aside>
+
+    <div class="sidebar-overlay"></div>
+
+    <div class="main">
+      <header class="topbar">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button class="sidebar-toggle" data-sidebar-toggle type="button" aria-label="Abrir menú de navegación" aria-expanded="false" aria-controls="sidebar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+          </button>
+          <div class="topbar__heading">
+            <span class="eyebrow">Panel</span>
+            <h1>Dashboard</h1>
+          </div>
+        </div>
+      </header>
+
+      <main id="contenido" class="content">
+        <section class="stats-grid stagger" aria-label="Métricas generales">
+          <div class="stat-card">
+            <div class="stat-card__top">
+              <span class="stat-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg></span>
+            </div>
+            <div class="stat-card__value" data-stat-total-libros>0</div>
+            <div class="stat-card__label">Total de libros</div>
+          </div>
+
+          <div class="stat-card stat-card--amber">
+            <div class="stat-card__top">
+              <span class="stat-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg></span>
+            </div>
+            <div class="stat-card__value" data-stat-prestados>0</div>
+            <div class="stat-card__label">Libros prestados</div>
+          </div>
+
+          <div class="stat-card stat-card--teal">
+            <div class="stat-card__top">
+              <span class="stat-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg></span>
+            </div>
+            <div class="stat-card__value" data-stat-disponibles>0</div>
+            <div class="stat-card__label">Libros disponibles</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card__top">
+              <span class="stat-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+            </div>
+            <div class="stat-card__value" data-stat-usuarios>0</div>
+            <div class="stat-card__label">Usuarios registrados</div>
+          </div>
+        </section>
+
+        <section class="dash-grid">
+          <div class="panel chart-panel fade-in">
+            <div class="panel__header">
+              <div>
+                <h2>Préstamos por mes</h2>
+                <p>Últimos 6 meses</p>
+              </div>
+            </div>
+            <canvas id="grafico-prestamos" role="img" aria-label="Gráfico de barras con la cantidad de préstamos por mes"></canvas>
+          </div>
+
+          <div class="panel fade-in">
+            <div class="panel__header">
+              <div>
+                <h2>Libros más prestados</h2>
+                <p>Top 5 histórico</p>
+              </div>
+            </div>
+            <div class="ranking-list" data-ranking-libros></div>
+          </div>
+        </section>
+
+        <section class="bottom-grid">
+          <div class="panel fade-in">
+            <div class="panel__header">
+              <div>
+                <h2>Categorías más populares</h2>
+                <p>Por préstamos registrados</p>
+              </div>
+            </div>
+            <div style="height:150px;"><canvas id="grafico-categorias" role="img" aria-label="Gráfico de dona con las categorías más prestadas"></canvas></div>
+            <div class="donut-legend" data-leyenda-categorias></div>
+          </div>
+
+          <div class="panel fade-in">
+            <div class="panel__header">
+              <div>
+                <h2>Usuarios con más préstamos</h2>
+                <p>Top 5 histórico</p>
+              </div>
+            </div>
+            <div class="ranking-list" data-ranking-usuarios></div>
+          </div>
+
+          <div class="panel fade-in">
+            <div class="panel__header">
+              <div>
+                <h2>Préstamos del mes</h2>
+                <p>Mes en curso</p>
+              </div>
+            </div>
+            <div class="stat-card__value" data-stat-mes style="margin-top: 18px;">0</div>
+            <p class="stat-card__label" style="margin-top:4px;">Préstamos registrados este mes</p>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script type="module" src="js/app.js"></script>
+  <script type="module" src="js/dashboard.js"></script>
+</body>
+</html>

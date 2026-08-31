@@ -1,0 +1,137 @@
+/* ==========================================================================
+   BIBLIOTECA — forms.css
+   Modales, campos de formulario y estados de validación.
+   ========================================================================== */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 14, 12, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 150;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--t-base);
+}
+.modal-overlay.is-open { opacity: 1; pointer-events: auto; }
+
+.modal {
+  background: var(--bg-elevated);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 480px;
+  max-height: 88vh;
+  overflow-y: auto;
+  transform: translateY(14px) scale(0.98);
+  transition: transform var(--t-base);
+}
+.modal-overlay.is-open .modal { transform: translateY(0) scale(1); }
+
+.modal--sm { max-width: 400px; }
+.modal--lg { max-width: 600px; }
+
+.modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 22px 4px;
+}
+.modal__header h2 { font-size: 16.5px; font-weight: 700; }
+.modal__header p { font-size: 12.5px; color: var(--text-tertiary); margin-top: 3px; }
+
+.modal__close {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.modal__close:hover { background: var(--bg-hover); color: var(--text-primary); }
+.modal__close svg { width: 17px; height: 17px; }
+
+.modal__body { padding: 16px 22px 4px; }
+.modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 18px 22px 22px;
+}
+
+/* Campos */
+.field { margin-bottom: 16px; }
+.field:last-child { margin-bottom: 0; }
+
+.field label {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--text-primary);
+}
+.field label .opt {
+  color: var(--text-tertiary);
+  font-weight: 500;
+  text-transform: none;
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text-primary);
+  font-size: 13.5px;
+  transition: border-color var(--t-fast), background var(--t-fast);
+}
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: var(--accent);
+  background: var(--bg-elevated);
+}
+.field textarea { resize: vertical; min-height: 70px; }
+
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.field__hint { font-size: 11.5px; color: var(--text-tertiary); margin-top: 5px; }
+.field__error {
+  font-size: 11.5px;
+  color: var(--danger);
+  margin-top: 5px;
+  display: none;
+  align-items: center;
+  gap: 5px;
+}
+.field.has-error input,
+.field.has-error select,
+.field.has-error textarea {
+  border-color: var(--danger);
+}
+.field.has-error .field__error { display: flex; }
+
+/* Diálogo de confirmación (eliminar, etc.) */
+.confirm-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-md);
+  background: var(--danger-soft);
+  color: var(--danger);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+.confirm-icon svg { width: 21px; height: 21px; }
