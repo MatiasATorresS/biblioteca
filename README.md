@@ -109,3 +109,7 @@ Tal como sugiere la guía del proyecto, esta misma aplicación se puede
 reconstruir más adelante con React + Node.js/Express + MySQL, reemplazando
 `storage.js` por llamadas a una API REST — el resto de la lógica de negocio
 (validaciones, reglas de préstamo) se traslada casi sin cambios.
+
+---
+
+Proyecto desarrollado por **Matías Torres Sandoval** como pieza de portafolio — Ingeniero Civil Informático (UNAB).
