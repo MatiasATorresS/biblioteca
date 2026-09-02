@@ -4,10 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Préstamos · Biblioteca</title>
-  <meta name="description" content="Registro de préstamos y devoluciones, con historial completo." />
+  <meta name="description" content="Registro de préstamos y devoluciones de libros, con historial completo y exportación a PDF." />
+  <link rel="canonical" href="https://biblioteca-ejemplo.com/prestamos.html" />
+  <meta property="og:title" content="Préstamos · Biblioteca" />
+  <meta property="og:description" content="Registro de préstamos y devoluciones de libros, con historial completo y exportación a PDF." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://biblioteca-ejemplo.com/prestamos.html" />
+  <meta property="og:site_name" content="Biblioteca Sistema de Gestión" />
+  <meta property="og:locale" content="es_CL" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Préstamos · Biblioteca" />
+  <meta name="twitter:description" content="Registro de préstamos y devoluciones de libros, con historial completo." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/dashboard.css" />
   <link rel="stylesheet" href="css/forms.css" />
@@ -17,7 +27,7 @@
   <a class="skip-link" href="#contenido">Saltar al contenido</a>
 
   <div class="app-shell">
-    <aside class="sidebar" id="sidebar">
+    <aside class="sidebar" id="sidebar" aria-label="Barra lateral de navegación">
       <div class="sidebar__brand">
         <span class="sidebar__brand-mark" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -73,11 +83,11 @@
           </div>
         </div>
         <div class="topbar__actions">
-          <button class="btn btn--secondary btn--sm" data-exportar-pdf type="button">
+          <button class="btn btn--secondary btn--sm" data-exportar-pdf type="button" aria-label="Exportar historial de préstamos a PDF">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
             Exportar PDF
           </button>
-          <button class="btn btn--primary btn--sm" data-abrir-modal-prestamo type="button">
+          <button class="btn btn--primary btn--sm" data-abrir-modal-prestamo type="button" aria-label="Registrar un nuevo préstamo">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
             Registrar préstamo
           </button>
@@ -97,11 +107,11 @@
               <option value="devuelto">Devuelto</option>
             </select>
             <div class="toolbar-spacer"></div>
-            <span class="muted" data-prestamos-contador style="font-size:12.5px;color:var(--text-tertiary);"></span>
+            <span class="muted" data-prestamos-contador id="prestamos-contador-info" aria-live="polite" aria-atomic="true" style="font-size:12.5px;color:var(--text-tertiary);"></span>
           </div>
 
-          <div class="table-wrap">
-            <table class="data-table">
+          <div class="table-wrap" role="region" aria-label="Tabla de préstamos">
+            <table class="data-table" aria-describedby="prestamos-contador-info">
               <thead>
                 <tr>
                   <th>Libro</th>

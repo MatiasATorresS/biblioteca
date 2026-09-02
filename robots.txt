@@ -1,0 +1,16 @@
+# Biblioteca - Sistema de Gestión
+# https://biblioteca-ejemplo.com
+
+User-agent: *
+Allow: /
+
+# Bloquear acceso a archivos de datos y configuración
+Disallow: /data/
+Disallow: /js/
+Disallow: /css/
+
+# Permitir acceso a páginas HTML y assets públicos
+Allow: /assets/
+
+# Sitemap
+Sitemap: https://biblioteca-ejemplo.com/sitemap.xml

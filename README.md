@@ -45,6 +45,8 @@ biblioteca/
 ├── libros.html        # CRUD de libros, búsqueda, filtros, orden, PDF
 ├── usuarios.html       # CRUD de usuarios, búsqueda
 ├── prestamos.html      # Registrar préstamo/devolución, historial, PDF
+├── robots.txt          # Directivas de rastreo para buscadores
+├── sitemap.xml         # Mapa del sitio para buscadores
 ├── css/
 │   ├── style.css       # Tokens de diseño, layout, componentes base
 │   ├── dashboard.css   # Tarjetas de métricas y gráficos
@@ -87,6 +89,13 @@ biblioteca/
   accesibilidad: etiquetas semánticas, *skip link*, navegación por teclado
   en los modales (trampa de foco + cierre con Escape), `aria-live` en las
   notificaciones y foco visible en todos los controles.
+
+- **SEO:** `robots.txt`, `sitemap.xml`, etiquetas Open Graph/Twitter y
+  *structured data* (JSON-LD con `WebApplication`) en el dashboard.
+
+- **Diseño editorial:** tipografías DM Serif Display (títulos) y Source
+  Sans 3 (cuerpo), texturas de ruido y gradientes atmosféricos, y micro
+  interacciones en botones, tablas, sidebar y tarjetas de estadísticas.
 
 ## 🧠 Decisiones técnicas
 
