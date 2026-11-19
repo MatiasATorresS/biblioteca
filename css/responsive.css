@@ -88,8 +88,111 @@
 
   .theme-toggle--icon { display: inline-flex; }
 
+  /* En móvil la barra inferior ocupa 56px + safe-area. Damos padding amplio para no tapar contenido */
   .content {
-    padding: 16px 14px calc(84px + env(safe-area-inset-bottom));
+    padding: 14px 12px calc(96px + env(safe-area-inset-bottom));
+  }
+
+  /* Grid y separación entre paneles en móvil */
+  .dash-grid,
+  .bottom-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .stat-card {
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .stat-card__top {
+    margin-bottom: 6px;
+  }
+  .stat-card__icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+  }
+  .stat-card__icon svg {
+    width: 14px;
+    height: 14px;
+  }
+  .stat-card__value {
+    font-size: 22px;
+    margin-bottom: 2px;
+  }
+  .stat-card__label {
+    font-size: 11px;
+    line-height: 1.2;
+  }
+
+  /* Paneles del dashboard en móvil: relleno y tipografía optimizados */
+  .panel {
+    padding: 14px 12px;
+    border-radius: var(--radius-md);
+  }
+  .panel__header {
+    margin-bottom: 12px;
+  }
+  .panel__header h2 {
+    font-size: 15px;
+  }
+  .panel__header p {
+    font-size: 11.5px;
+  }
+
+  /* Altura de gráficos adaptada a pantallas móviles */
+  .chart-holder {
+    height: 185px;
+  }
+  .chart-holder--sm {
+    height: 130px;
+  }
+
+  /* Rankings en móvil: filas compactas sin saltos */
+  .ranking-item {
+    padding: 7px 0;
+    gap: 8px;
+  }
+  .ranking-item__title {
+    font-size: 12.5px;
+  }
+  .ranking-item__sub {
+    font-size: 11px;
+  }
+  .ranking-item__count {
+    font-size: 11.5px;
+  }
+
+  /* Acciones de respaldo en móvil */
+  .maintenance__actions {
+    flex-direction: column;
+  }
+  .maintenance__actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .month-metric {
+    margin-top: 8px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .month-metric__value {
+    font-size: 24px;
+  }
+  .month-metric__label {
+    margin-top: 0;
+    font-size: 11.5px;
   }
 
   /* Campos a 16px: Safari iOS no hace zoom al enfocar */
@@ -106,72 +209,6 @@
   .cover-preview { width: 68px; height: 102px; }
   .cover-field__hint { display: none; }
   .cover-field .field--inline input { font-size: 16px; }
-
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 10px;
-    margin-bottom: 16px;
-  }
-  .stat-card {
-    padding: 12px 14px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-  .stat-card__top {
-    margin-bottom: 10px;
-  }
-  .stat-card__icon {
-    width: 28px;
-    height: 28px;
-    border-radius: 7px;
-  }
-  .stat-card__icon svg {
-    width: 15px;
-    height: 15px;
-  }
-  .stat-card__value {
-    font-size: 24px;
-    margin-bottom: 2px;
-  }
-  .stat-card__label {
-    font-size: 11.5px;
-    line-height: 1.25;
-  }
-
-  /* Paneles del dashboard en móvil: relleno optimizado */
-  .panel {
-    padding: 16px 14px;
-    border-radius: var(--radius-md);
-  }
-  .panel__header {
-    margin-bottom: 14px;
-  }
-  .panel__header h2 {
-    font-size: 15.5px;
-  }
-
-  /* Altura de gráficos adaptada a pantallas móviles */
-  .chart-holder {
-    height: 210px;
-  }
-  .chart-holder--sm {
-    height: 140px;
-  }
-
-  .month-metric {
-    margin-top: 10px;
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-  }
-  .month-metric__value {
-    font-size: 26px;
-  }
-  .month-metric__label {
-    margin-top: 0;
-    font-size: 12px;
-  }
 
   .toolbar { flex-direction: column; align-items: stretch; gap: 8px; }
   .search-field { max-width: none; min-width: 0; }
