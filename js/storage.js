@@ -5,7 +5,7 @@
 // CRUD, además de los repositorios concretos ya instanciados.
 // ==========================================================================
 
-import { generarId, hoyISO, sumarDiasISO } from "./utils.js";
+import { generarId, hoyISO, sumarDiasISO, esPortadaValida } from "./utils.js";
 
 const CLAVES = {
   libros: "biblioteca_libros",
@@ -19,7 +19,7 @@ const CLAVES = {
    Modelos
    ------------------------------------------------------------------------- */
 export class Libro {
-  constructor({ id, titulo, autor, categoria, isbn, anio, estado = "disponible" }) {
+  constructor({ id, titulo, autor, categoria, isbn, anio, estado = "disponible", portada = "", portadaAuto = true }) {
     this.id = id ?? generarId("lib");
     this.titulo = titulo;
     this.autor = autor;
@@ -27,6 +27,8 @@ export class Libro {
     this.isbn = isbn;
     this.anio = Number(anio);
     this.estado = estado; // "disponible" | "prestado"
+    this.portada = typeof portada === "string" ? portada.trim() : "";
+    this.portadaAuto = portadaAuto !== false;
   }
 }
 
@@ -88,8 +90,7 @@ class Repositorio {
   agregar(item) {
     const lista = this.obtenerTodos();
     lista.push(item);
-    this.guardarTodos(lista);
-    return item;
+    return this.guardarTodos(lista) ? item : null;
   }
 
   actualizar(id, cambios) {
@@ -97,7 +98,7 @@ class Repositorio {
     const indice = lista.findIndex((item) => item.id === id);
     if (indice === -1) return null;
     lista[indice] = { ...lista[indice], ...cambios };
-    this.guardarTodos(lista);
+    if (!this.guardarTodos(lista)) return null;
     return lista[indice];
   }
 
@@ -185,9 +186,13 @@ export function sembrarDatosIniciales() {
   repoPrestamos.guardarTodos(prestamos);
 
   // Los libros con préstamo activo deben figurar como "prestado".
-  prestamos
-    .filter((p) => p.estado === "activo")
-    .forEach((p) => repoLibros.actualizar(p.libroId, { estado: "prestado" }));
+  // Se actualiza la lista en memoria y se guarda una sola vez (antes se
+  // hacía una lectura + escritura completa de LocalStorage por cada libro).
+  const idsPrestados = new Set(prestamos.filter((p) => p.estado === "activo").map((p) => p.libroId));
+  libros.forEach((libro) => {
+    if (idsPrestados.has(libro.id)) libro.estado = "prestado";
+  });
+  repoLibros.guardarTodos(libros);
 
   localStorage.setItem(CLAVES.seed, "1");
 }
@@ -199,4 +204,95 @@ export function reiniciarDatos() {
   localStorage.removeItem(CLAVES.prestamos);
   localStorage.removeItem(CLAVES.seed);
   sembrarDatosIniciales();
+}
+
+/* -------------------------------------------------------------------------
+   Respaldo: exportar / importar JSON
+   ------------------------------------------------------------------------- */
+const VERSION_RESPALDO = 1;
+
+/** Devuelve una copia serializable de toda la base local. */
+export function crearRespaldo() {
+  return {
+    aplicacion: "biblioteca",
+    version: VERSION_RESPALDO,
+    generado: new Date().toISOString(),
+    libros: repoLibros.obtenerTodos(),
+    usuarios: repoUsuarios.obtenerTodos(),
+    prestamos: repoPrestamos.obtenerTodos(),
+  };
+}
+
+function idsUnicos(lista) {
+  const ids = lista.map((item) => item?.id);
+  return ids.every((id) => typeof id === "string" && id.length > 0) && new Set(ids).size === ids.length;
+}
+
+function camposPresentes(lista, campos) {
+  return lista.every(
+    (item) => item && typeof item === "object" && campos.every((campo) => campo in item)
+  );
+}
+
+/**
+ * Valida la estructura de un respaldo antes de sobrescribir datos.
+ * Devuelve null si es válido o un mensaje de error legible.
+ */
+export function validarRespaldo(datos) {
+  if (!datos || typeof datos !== "object" || Array.isArray(datos)) {
+    return "El archivo no contiene un objeto de respaldo válido.";
+  }
+
+  for (const clave of ["libros", "usuarios", "prestamos"]) {
+    if (!Array.isArray(datos[clave])) return `El respaldo no incluye la lista "${clave}".`;
+    if (!idsUnicos(datos[clave])) return `La lista "${clave}" tiene identificadores inválidos o duplicados.`;
+  }
+
+  if (!camposPresentes(datos.libros, ["titulo", "autor", "categoria", "isbn"])) {
+    return "Hay libros con campos obligatorios incompletos.";
+  }
+  const portadaInvalida = datos.libros.some(
+    (libro) =>
+      (libro.portada != null &&
+        (typeof libro.portada !== "string" ||
+          libro.portada.length > 700000 ||
+          (libro.portada !== "" && !esPortadaValida(libro.portada)))) ||
+      (libro.portadaAuto != null && typeof libro.portadaAuto !== "boolean")
+  );
+  if (portadaInvalida) return "Hay portadas con un formato o tamaño inválido.";
+  if (!camposPresentes(datos.usuarios, ["nombre", "documento"])) {
+    return "Hay usuarios con campos obligatorios incompletos.";
+  }
+  if (!camposPresentes(datos.prestamos, ["libroId", "usuarioId", "fechaPrestamo", "estado"])) {
+    return "Hay préstamos con campos obligatorios incompletos.";
+  }
+
+  const idsLibros = new Set(datos.libros.map((libro) => libro.id));
+  const idsUsuarios = new Set(datos.usuarios.map((usuario) => usuario.id));
+  const huerfano = datos.prestamos.some(
+    (prestamo) => !idsLibros.has(prestamo.libroId) || !idsUsuarios.has(prestamo.usuarioId)
+  );
+  if (huerfano) return "Hay préstamos que apuntan a libros o usuarios inexistentes.";
+
+  return null;
+}
+
+/** Reemplaza todos los datos por los de un respaldo ya validado. */
+export function importarRespaldo(datos) {
+  const error = validarRespaldo(datos);
+  if (error) return error;
+
+  try {
+    const okLibros = repoLibros.guardarTodos(datos.libros);
+    const okUsuarios = repoUsuarios.guardarTodos(datos.usuarios);
+    const okPrestamos = repoPrestamos.guardarTodos(datos.prestamos);
+    if (!okLibros || !okUsuarios || !okPrestamos) {
+      return "No se pudo escribir el respaldo. Revisa el espacio disponible del navegador.";
+    }
+    localStorage.setItem(CLAVES.seed, "1");
+    return null;
+  } catch (error) {
+    console.error("No se pudo importar el respaldo:", error);
+    return "Ocurrió un error al importar el respaldo.";
+  }
 }

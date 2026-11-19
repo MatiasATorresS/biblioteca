@@ -13,10 +13,18 @@
   padding: 20px;
   z-index: 150;
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
-  transition: opacity var(--t-base);
+  /* `visibility` cambia al instante al abrir (permite enfocar el primer campo)
+     y se retrasa al cerrar para que se vea el fundido. */
+  transition: opacity var(--t-base), visibility 0s linear var(--t-base);
 }
-.modal-overlay.is-open { opacity: 1; pointer-events: auto; }
+.modal-overlay.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity var(--t-base), visibility 0s linear 0s;
+}
 
 .modal {
   background: var(--bg-elevated);
@@ -24,8 +32,9 @@
   box-shadow: var(--shadow-lg);
   width: 100%;
   max-width: 480px;
-  max-height: 88vh;
+  max-height: 88dvh;
   overflow-y: auto;
+  overscroll-behavior: contain;
   transform: translateY(14px) scale(0.98);
   transition: transform var(--t-base);
 }
@@ -41,15 +50,15 @@
   gap: 12px;
   padding: 20px 22px 4px;
 }
-.modal__header h2 { font-size: 16.5px; font-weight: 700; }
+.modal__header h2 { font-size: 19px; font-weight: 400; }
 .modal__header p { font-size: 12.5px; color: var(--text-tertiary); margin-top: 3px; }
 
 .modal__close {
   background: none;
   border: none;
   color: var(--text-tertiary);
-  width: 30px;
-  height: 30px;
+  width: 34px;
+  height: 34px;
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
@@ -66,6 +75,11 @@
   gap: 8px;
   padding: 18px 22px 22px;
 }
+
+/* Confirmación genérica */
+.modal--confirmar .modal__body { padding-top: 22px; }
+.modal--confirmar h2 { font-size: 19px; margin-bottom: 6px; }
+.modal--confirmar p { font-size: 13.5px; color: var(--text-secondary); }
 
 /* Campos */
 .field { margin-bottom: 16px; }
@@ -96,6 +110,9 @@
   font-size: 13.5px;
   transition: border-color var(--t-fast), background var(--t-fast);
 }
+.field input::placeholder,
+.field textarea::placeholder { color: var(--text-tertiary); }
+
 .field input:focus,
 .field select:focus,
 .field textarea:focus {
@@ -105,6 +122,116 @@
 .field textarea { resize: vertical; min-height: 70px; }
 
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* Autocompletado de títulos con Open Library */
+.autocomplete { position: relative; }
+.autocomplete__list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+  max-height: 230px;
+  overflow-y: auto;
+  padding: 4px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+}
+.autocomplete__list--arriba {
+  top: auto;
+  bottom: calc(100% + 4px);
+}
+.autocomplete__item {
+  display: block;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.autocomplete__item:hover,
+.autocomplete__item.is-active { background: var(--accent-soft); }
+.autocomplete__item-title {
+  display: block;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.autocomplete__item-meta {
+  display: block;
+  overflow: hidden;
+  margin-top: 2px;
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.autocomplete__status {
+  margin: 5px 0 0;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--text-tertiary);
+}
+.autocomplete__status:empty { display: none; }
+.autocomplete__status.is-error { color: var(--danger); }
+
+/* Portada del libro dentro del formulario */
+.cover-field {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.cover-preview {
+  position: relative;
+  width: 84px;
+  height: 126px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-sunken);
+  color: var(--text-tertiary);
+}
+.cover-preview img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.cover-preview__placeholder { width: 26px; height: 26px; opacity: 0.6; }
+.cover-field__body { flex: 1; min-width: 0; }
+.cover-field__title { font-size: 12.5px; font-weight: 600; }
+.cover-field__hint {
+  margin: 3px 0 9px;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--text-tertiary);
+}
+.cover-field__actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.cover-field__actions .btn { min-height: 32px; }
+.cover-field .field--inline { margin: 8px 0 0; }
+.cover-field .field--inline label {
+  margin-bottom: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+}
+.cover-field .field--inline input { padding: 7px 9px; font-size: 12px; }
+.cover-field__status {
+  min-height: 15px;
+  margin-top: 6px;
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+}
+.cover-field__status.is-error { color: var(--danger); }
 
 .field__hint { font-size: 11.5px; color: var(--text-tertiary); margin-top: 5px; }
 .field__error {
@@ -119,6 +246,7 @@
 .field.has-error select,
 .field.has-error textarea {
   border-color: var(--danger);
+  background: var(--danger-soft);
 }
 .field.has-error .field__error { display: flex; }
 

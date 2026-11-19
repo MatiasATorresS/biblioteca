@@ -26,11 +26,25 @@ npx serve .
 # clic derecho sobre index.html → "Open with Live Server"
 ```
 
+La portada (`index.html`) es una landing real: explica el sistema y lleva al
+dashboard mediante un botón, sin redirecciones automáticas.
+
 Al abrir el sitio por primera vez se cargan automáticamente datos de ejemplo
 (12 libros, 5 usuarios y 10 préstamos históricos) para que el dashboard y los
 gráficos no se vean vacíos. Todo se guarda después en `localStorage`, así que
-los cambios persisten entre recargas. Si en algún momento quieres limpiar todo
-y volver a los datos de ejemplo, abre la consola del navegador y ejecuta:
+los cambios persisten entre recargas.
+
+### Respaldo de los datos
+
+Los datos viven solo en el navegador, por lo que conviene exportarlos:
+
+- **Dashboard → Descargar respaldo**: genera un archivo JSON con libros,
+  usuarios y préstamos.
+- **Dashboard → Importar respaldo**: valida el archivo antes de reemplazar los
+  datos actuales y pide confirmación.
+- **Dashboard → Restaurar ejemplo**: vuelve al set inicial de demostración.
+
+También puedes limpiar todo desde la consola del navegador:
 
 ```js
 localStorage.clear(); location.reload();
@@ -40,62 +54,117 @@ localStorage.clear(); location.reload();
 
 ```
 biblioteca/
-├── index.html        # Pantalla de entrada (redirige a dashboard.html)
-├── dashboard.html     # Métricas + gráficos (Chart.js)
-├── libros.html        # CRUD de libros, búsqueda, filtros, orden, PDF
+├── index.html          # Landing pública con CTA al panel
+├── dashboard.html      # Métricas, gráficos (Chart.js) y respaldos
+├── libros.html         # CRUD de libros, búsqueda, filtros, orden, PDF
 ├── usuarios.html       # CRUD de usuarios, búsqueda
 ├── prestamos.html      # Registrar préstamo/devolución, historial, PDF
 ├── robots.txt          # Directivas de rastreo para buscadores
 ├── sitemap.xml         # Mapa del sitio para buscadores
 ├── css/
 │   ├── style.css       # Tokens de diseño, layout, componentes base
-│   ├── dashboard.css   # Tarjetas de métricas y gráficos
+│   ├── dashboard.css   # Tarjetas de métricas, gráficos y mantenimiento
 │   ├── forms.css       # Modales y formularios
 │   └── responsive.css  # Adaptación a tablet/móvil
 ├── js/
 │   ├── app.js           # Bootstrap común a todas las páginas
-│   ├── storage.js        # Clases de modelo + repositorio sobre LocalStorage
-│   ├── utils.js           # Validaciones, fechas, helpers puros
-│   ├── ui.js               # Modales, toasts, tema claro/oscuro, sidebar
-│   ├── dashboard.js         # Métricas y gráficos del panel principal
-│   ├── libros.js              # Lógica de la página de libros
-│   ├── usuarios.js             # Lógica de la página de usuarios
-│   └── prestamos.js             # Lógica de la página de préstamos
+│   ├── storage.js       # Clases de modelo, repositorio y respaldos
+│   ├── utils.js         # Validaciones, fechas, portadas y compresión de imágenes
+│   ├── ui.js            # Modales, toasts, tema, drawer y helpers de formulario
+│   ├── pdf.js           # Carga perezosa de jsPDF + exportación de tablas
+│   ├── dashboard.js     # Métricas, gráficos y respaldos del panel
+│   ├── libros.js        # Lógica de la página de libros
+│   ├── usuarios.js      # Lógica de la página de usuarios
+│   └── prestamos.js     # Lógica de la página de préstamos
 ├── assets/
-│   ├── icons/            # (reservado — los iconos actuales son SVG inline)
-│   └── images/           # (reservado para uso futuro)
-└── data/                  # (reservado — los datos viven en LocalStorage)
+│   ├── icons/           # Favicon SVG y apple-touch-icon
+│   └── images/          # Imagen Open Graph para compartir en redes
+└── data/                # (reservado — los datos viven en LocalStorage)
 ```
 
 ## ✅ Funcionalidades implementadas
 
 - **Dashboard:** total de libros, prestados, disponibles, usuarios
   registrados, gráfico de préstamos por mes (barras), categorías más
-  populares (dona) y rankings de libros/usuarios con más préstamos.
+  populares (dona) y rankings de libros/usuarios con más préstamos. Los
+  gráficos tienen resumen textual para lectores de pantalla y un aviso de
+  respaldo si Chart.js no carga.
 - **Libros:** alta, edición, eliminación (bloqueada si el libro está
   prestado), búsqueda en tiempo real (título/autor/ISBN), filtro por
-  categoría y estado, orden por columnas (clic en el encabezado),
-  validación de ISBN-10/13 y de año.
+  categoría y estado, orden por columnas (accesible con teclado y con un
+  selector propio en móvil), validación de ISBN-10/13 y de año,
+  **autocompletado por título** y **portadas**: al escribir un título se
+  buscan coincidencias en Open Library y, al elegir una, se completan autor,
+  categoría, ISBN, año y portada. Las portadas también se buscan por ISBN, se
+  pueden subir desde el equipo (se recortan y comprimen a WebP ~300×450) o
+  indicar con una URL. La miniatura aparece en la tabla y en el ranking del
+  dashboard.
 - **Usuarios:** registro, edición, eliminación (bloqueada si tiene
   préstamos activos), búsqueda en tiempo real, validación de RUT chileno
   (dígito verificador real), correo y teléfono.
 - **Préstamos:** selección de usuario y libro disponible, fecha de
-  devolución estimada editable, registro de devolución, historial completo
-  con búsqueda y filtro por estado, marca visual de atraso.
+  devolución estimada (no permite fechas pasadas), registro de devolución,
+  historial completo con búsqueda y filtro por estado, marca visual de
+  atraso.
+- **Respaldo:** exportación/importación JSON validada y restauración de los
+  datos de ejemplo desde el dashboard.
 - **Extras:** modo oscuro (con detección de preferencia del sistema),
-  exportación a PDF de libros y préstamos (jsPDF), gráficos con Chart.js,
-  búsqueda en tiempo real con debounce, diseño responsive (las tablas se
-  convierten en tarjetas en móvil), animaciones suaves con CSS, y
-  accesibilidad: etiquetas semánticas, *skip link*, navegación por teclado
-  en los modales (trampa de foco + cierre con Escape), `aria-live` en las
-  notificaciones y foco visible en todos los controles.
+  exportación a PDF de libros y préstamos (jsPDF cargado solo al pulsar el
+  botón), búsqueda con debounce, diseño responsive y navegación móvil por
+  tab bar inferior con modales tipo *bottom sheet*.
 
-- **SEO:** `robots.txt`, `sitemap.xml`, etiquetas Open Graph/Twitter y
-  *structured data* (JSON-LD con `WebApplication`) en el dashboard.
+### Autocompletado por título
 
-- **Diseño editorial:** tipografías DM Serif Display (títulos) y Source
-  Sans 3 (cuerpo), texturas de ruido y gradientes atmosféricos, y micro
-  interacciones en botones, tablas, sidebar y tarjetas de estadísticas.
+- Al escribir al menos **3 letras** del título, aparece una lista con hasta
+  seis coincidencias de la
+  [API de búsqueda de Open Library](https://openlibrary.org/developers/api).
+  Cada sugerencia muestra título, autor y año para distinguir ediciones.
+- Al elegir una sugerencia con el mouse, con el dedo o con **↑ ↓ + Enter**, se
+  completan título, autor, categoría, ISBN, año y portada. La categoría se
+  deduce de los temas del libro y siempre se puede cambiar antes de guardar.
+- No se completa nada hasta que eliges una sugerencia: así se evita guardar
+  una edición u obra equivocada solo porque coincidía el título.
+- Si ya subiste o pegaste una portada manual, el autocompletado **no la
+  reemplaza**. La búsqueda se hace directamente desde el navegador a
+  Open Library, sin API key ni servidor propio, y requiere conexión.
+- El campo funciona como un *combobox* accesible: lista `listbox`, opciones con
+  `aria-selected`, navegación con flechas, cierre con Escape y avisos en una
+  región `aria-live`.
+
+### Portadas de libros
+
+- **Automáticas:** al escribir un ISBN válido se busca la portada en
+  [Open Library](https://openlibrary.org/) (`covers.openlibrary.org`). Si no
+  existe, se muestra un ícono con el color de la categoría. Al elegir una
+  sugerencia por título también se usa la portada de esa edición cuando está
+  disponible.
+- **Subidas:** se aceptan imágenes de hasta 10 MB que el navegador pueda
+  decodificar (PNG, JPEG, WebP, GIF, AVIF, etc.); la imagen se recorta al
+  centro (2:3) y se comprime a WebP de 300×450 antes de guardarse. Una portada
+  típica pesa ~30–60 KB.
+- **URL manual:** también puedes pegar un enlace `https://…` o una ruta local
+  como `assets/images/portada.jpg`.
+- **Quitar:** oculta la portada y desactiva la búsqueda automática para ese
+  libro; puedes volver a activarla con *Buscar por ISBN*.
+- Las portadas subidas se guardan en LocalStorage y por eso **entran en el
+  respaldo JSON**. Si guardas muchos libros con imagen, revisa el espacio
+  disponible del navegador. Las portadas remotas solo guardan la URL y
+  necesitan conexión para verse.
+
+### Accesibilidad y rendimiento
+
+- Etiquetas semánticas, *skip link*, foco visible y contraste AA.
+- Modales con trampa de foco, cierre con Escape, atributo `inert` y
+  `aria-hidden` para que lo cerrado no sea enfocable ni anunciado.
+- Errores de formulario enlazados con `aria-invalid` y `aria-describedby`.
+- El autocompletado de títulos usa el patrón accesible *combobox/listbox*, con
+  navegación por teclado y avisos `aria-live`.
+- Encabezados de tabla ordenables con `aria-sort`; avisos con `aria-live`.
+- Sincronización entre pestañas: si editas en una, las demás se actualizan.
+- Chart.js y jsPDF se cargan desde CDN con **SRI** (integridad verificada);
+  jsPDF solo se descarga al exportar.
+- Fuentes recortadas a DM Serif Display y Source Sans 3 (400/500/600/700);
+  el resto usa la pila del sistema.
 
 ## 🧠 Decisiones técnicas
 
@@ -105,12 +174,25 @@ biblioteca/
 - **Repositorio genérico (`Repositorio`)** en `storage.js`: una sola clase
   con `obtenerTodos/agregar/actualizar/eliminar` reutilizada por libros,
   usuarios y préstamos — evita repetir lógica de LocalStorage tres veces.
-- **El "sello" de estado "Prestado"** (`.stamp` en `style.css`) es el
-  detalle visual distintivo de la interfaz: imita el sello de tampón que
-  se estampaba en las fichas de préstamo de una biblioteca física.
-- **CDN usados:** Chart.js (`dashboard.html`) y jsPDF (`libros.html`,
-  `prestamos.html`). Si necesitas trabajar sin conexión, descarga ambas
-  librerías y cambia las URLs por rutas locales.
+- **Shell estático por página:** la navegación y la topbar se repiten en cada
+  HTML en lugar de inyectarse por JS. Es deliberado: evita un parpadeo al
+  cargar y permite que los buscadores lean el contenido sin ejecutar scripts.
+- **El "sello" de estado "Prestado"** (`.stamp` en `style.css`) y la etiqueta
+  de categoría tipo lomo (`.spine-tag`) son el detalle visual distintivo:
+  imitan las marcas de una ficha de préstamo de biblioteca física.
+- **CDN usados:** Chart.js (`dashboard.html`) y jsPDF (`js/pdf.js`). Si
+  necesitas trabajar sin conexión, descarga ambas librerías y cambia las URLs
+  por rutas locales.
+
+## 🔎 SEO y despliegue
+
+- Cada página tiene `title`, `description`, canonical relativo, favicon,
+  Open Graph/Twitter y `lang="es-CL"`.
+- `robots.txt` bloquea solo `/data/` y permite CSS/JS/assets.
+- **Antes de publicar**, reemplaza `https://biblioteca-ejemplo.com` por tu
+  dominio real en: `og:image`/`twitter:image` de los HTML, JSON-LD,
+  `robots.txt` y `sitemap.xml`. La imagen de compartir está en
+  `assets/images/og-cover.png` (1200×630).
 
 ## 🚀 Posibles siguientes pasos
 

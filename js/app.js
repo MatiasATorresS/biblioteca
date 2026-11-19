@@ -17,9 +17,19 @@ export function inicializarApp() {
     boton.addEventListener("click", alternarTema);
   });
 
-  // Año actual en el footer del sidebar, si existe.
-  const anioEl = document.querySelector("[data-anio-actual]");
-  if (anioEl) anioEl.textContent = new Date().getFullYear();
+  // Año actual en el footer, si existe.
+  document.querySelectorAll("[data-anio-actual]").forEach((el) => {
+    el.textContent = new Date().getFullYear();
+  });
+
+  // Sincronización entre pestañas: si otra pestaña modifica los datos,
+  // cada página escucha este evento y vuelve a pintar sus tablas.
+  window.addEventListener("storage", (evento) => {
+    if (!evento.key || !evento.key.startsWith("biblioteca_")) return;
+    document.dispatchEvent(
+      new CustomEvent("biblioteca:datos-actualizados", { detail: { clave: evento.key } })
+    );
+  });
 }
 
 inicializarApp();

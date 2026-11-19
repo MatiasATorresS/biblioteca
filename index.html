@@ -1,85 +1,149 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es-CL">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Biblioteca · Sistema de gestión</title>
-  <meta name="description" content="Sistema de gestión de biblioteca: catálogo de libros, registro de usuarios y control de préstamos con dashboard interactivo." />
-  <meta http-equiv="refresh" content="2; url=dashboard.html" />
-  <link rel="canonical" href="https://biblioteca-ejemplo.com/" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#f7f7f5" />
+  <script>
+    (() => {
+      try {
+        const guardado = localStorage.getItem("biblioteca_tema");
+        const tema = guardado === "dark" || guardado === "light"
+          ? guardado
+          : (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.dataset.theme = tema;
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.content = tema === "dark" ? "#15161a" : "#f7f7f5";
+      } catch { /* almacenamiento deshabilitado */ }
+    })();
+  </script>
+  <title>Biblioteca · Sistema de gestión de libros, usuarios y préstamos</title>
+  <meta name="description" content="Sistema de gestión de biblioteca: catálogo de libros con portadas y autocompletado, gestión de usuarios y préstamos, dashboard de estadísticas y exportación a PDF. Funciona sin instalar nada." />
+  <link rel="canonical" href="./" />
+  <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg" />
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" />
+
   <meta property="og:title" content="Biblioteca · Sistema de Gestión" />
-  <meta property="og:description" content="Sistema de gestión de biblioteca: catálogo de libros, registro de usuarios y control de préstamos." />
+  <meta property="og:description" content="Catálogo de libros con portadas automáticas y autocompletado, gestión de usuarios y préstamos en un panel claro, con estadísticas y PDF." />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://biblioteca-ejemplo.com/" />
   <meta property="og:site_name" content="Biblioteca Sistema de Gestión" />
   <meta property="og:locale" content="es_CL" />
-  <meta name="twitter:card" content="summary" />
+  <meta property="og:image" content="https://biblioteca-ejemplo.com/assets/images/og-cover.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Biblioteca: catálogo de libros, usuarios y préstamos" />
+  <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Biblioteca · Sistema de Gestión" />
-  <meta name="twitter:description" content="Sistema de gestión de biblioteca: libros, usuarios y préstamos." />
+  <meta name="twitter:description" content="Catálogo de libros con portadas automáticas y autocompletado, gestión de usuarios y préstamos en un panel claro, con estadísticas y PDF." />
+  <meta name="twitter:image" content="https://biblioteca-ejemplo.com/assets/images/og-cover.png" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Source+Sans+3:wght@400;500;600;700&display=swap" />
   <link rel="stylesheet" href="css/style.css" />
-  <style>
-    .landing {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 18px;
-      text-align: center;
-      padding: 24px;
+  <link rel="stylesheet" href="css/responsive.css" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Biblioteca - Sistema de Gestión",
+    "description": "Sistema de gestión de biblioteca: catálogo de libros, registro de usuarios y control de préstamos con dashboard interactivo.",
+    "url": "https://biblioteca-ejemplo.com/",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web Browser",
+    "inLanguage": "es-CL",
+    "isAccessibleForFree": true,
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "CLP"
+    },
+    "author": {
+      "@type": "Person",
+      "name": "Matías Torres Sandoval"
     }
-    .landing__mark {
-      width: 64px;
-      height: 64px;
-      color: var(--accent);
-      animation: landing-pop 600ms var(--ease) both;
-    }
-    .landing__mark svg { width: 100%; height: 100%; }
-    .landing h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; }
-    .landing p { font-size: 13.5px; color: var(--text-secondary); max-width: 320px; }
-    .landing__bar {
-      width: 160px;
-      height: 4px;
-      border-radius: 4px;
-      background: var(--border);
-      overflow: hidden;
-      margin-top: 6px;
-    }
-    .landing__bar span {
-      display: block;
-      height: 100%;
-      width: 40%;
-      background: var(--accent);
-      border-radius: 4px;
-      animation: landing-bar 1.4s var(--ease) infinite;
-    }
-    .landing a { font-size: 12.5px; color: var(--accent); font-weight: 600; margin-top: 4px; }
-    @keyframes landing-pop {
-      from { opacity: 0; transform: scale(0.85); }
-      to { opacity: 1; transform: scale(1); }
-    }
-    @keyframes landing-bar {
-      0% { transform: translateX(-100%); }
-      100% { transform: translateX(280%); }
-    }
-  </style>
+  }
+  </script>
 </head>
 <body>
-  <main class="landing">
-    <div class="landing__mark" aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z" />
-        <path d="M9 7h6M9 11h6" />
-      </svg>
-    </div>
-    <h1>Biblioteca</h1>
-    <p>Sistema de gestión de préstamos, libros y usuarios.</p>
-    <div class="landing__bar" aria-hidden="true"><span></span></div>
-    <a href="dashboard.html">Entrar al panel ahora</a>
-  </main>
+  <div class="landing-page">
+    <header class="landing-header">
+      <a class="brand" href="./" aria-label="Biblioteca, ir al inicio">
+        <span class="brand__mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z" />
+            <path d="M9 7h6M9 11h6" />
+          </svg>
+        </span>
+        <span class="brand__text">Biblioteca<span>Sistema de gestión</span></span>
+      </a>
+
+      <div class="landing-header__actions">
+        <button class="theme-toggle theme-toggle--icon" data-theme-toggle type="button" aria-pressed="false" aria-label="Cambiar a modo oscuro">
+          <span class="theme-toggle__icons" aria-hidden="true">
+            <svg class="theme-icon theme-icon--sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+            <svg class="theme-icon theme-icon--moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+          </span>
+        </button>
+      </div>
+    </header>
+
+    <main class="landing">
+      <p class="landing__eyebrow">Gestión bibliotecaria</p>
+      <h1>El catálogo, los lectores y los préstamos <span>en un solo lugar</span>.</h1>
+      <p class="landing__lead">
+        Un panel simple para bibliotecas pequeñas: registra libros y usuarios, controla
+        qué está prestado y revisa las estadísticas del mes. Sin cuentas, sin
+        instalaciones y sin servidores: tus datos se guardan en este navegador.
+      </p>
+
+      <div class="landing__cta">
+        <a class="btn btn--primary" href="dashboard.html">
+          Abrir el panel
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <a class="btn btn--secondary" href="libros.html">Explorar el catálogo</a>
+      </div>
+
+      <p class="landing__note">
+        Incluye 12 libros, 5 usuarios y 10 préstamos de ejemplo para que puedas
+        probarlo de inmediato.
+      </p>
+
+      <section class="landing__features" aria-label="Qué incluye el sistema">
+        <article class="feature-card">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+          <h2>Dashboard</h2>
+          <p>Totales, préstamos por mes, categorías más populares y rankings de lectores.</p>
+        </article>
+
+        <article class="feature-card">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
+          <h2>Libros</h2>
+          <p>Alta, edición y búsqueda por título, autor o ISBN. Escribe un título y completa autor, categoría, año, ISBN y portada desde Open Library.</p>
+        </article>
+
+        <article class="feature-card">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <h2>Usuarios</h2>
+          <p>Ficha de cada lector con validación de RUT chileno, correo y teléfono.</p>
+        </article>
+
+        <article class="feature-card">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7v6h6"/><path d="M3 13a9 9 0 1 0 3-7.7L3 7"/></svg>
+          <h2>Préstamos</h2>
+          <p>Registro y devolución, historial con filtros y aviso visual de atrasos.</p>
+        </article>
+      </section>
+    </main>
+
+    <footer class="landing-footer">
+      © <span data-anio-actual></span> Biblioteca · Proyecto de Matías Torres Sandoval
+    </footer>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
 </body>
 </html>

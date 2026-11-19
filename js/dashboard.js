@@ -1,19 +1,54 @@
 // ==========================================================================
 // BIBLIOTECA — dashboard.js
-// Calcula las métricas del panel principal y dibuja los gráficos con
-// Chart.js (cargado globalmente vía CDN en dashboard.html).
+// Calcula las métricas del panel principal, dibuja los gráficos con Chart.js
+// y gestiona el respaldo (exportar / importar / restaurar) de los datos.
 // ==========================================================================
 
-import { repoLibros, repoUsuarios, repoPrestamos } from "./storage.js";
-import { MESES_CORTOS, colorPorTexto, truncar, escapeHTML } from "./utils.js";
+import {
+  repoLibros,
+  repoUsuarios,
+  repoPrestamos,
+  crearRespaldo,
+  validarRespaldo,
+  importarRespaldo,
+  reiniciarDatos,
+} from "./storage.js";
+import { MESES_CORTOS, colorPorTexto, truncar, escapeHTML, hoyISO, descargarJSON, portadaDeLibro } from "./utils.js";
+import { confirmar, mostrarToast, ICONOS } from "./ui.js";
 
 let chartPrestamos = null;
 let chartCategorias = null;
+const portadasFallidas = new Set();
 
 function obtenerColorVariable(nombre) {
   return getComputedStyle(document.documentElement).getPropertyValue(nombre).trim();
 }
 
+/* -------------------------------------------------------------------------
+   Fallback de gráficos (sin conexión / CDN bloqueado)
+   ------------------------------------------------------------------------- */
+function alternarFallback(holder, visible, mensaje = "") {
+  if (!holder) return;
+  const canvas = holder.querySelector("canvas");
+  let fallback = holder.querySelector(".chart-fallback");
+
+  if (visible) {
+    if (!fallback) {
+      fallback = document.createElement("p");
+      fallback.className = "chart-fallback";
+      holder.appendChild(fallback);
+    }
+    fallback.textContent = mensaje;
+    if (canvas) canvas.style.display = "none";
+  } else {
+    fallback?.remove();
+    if (canvas) canvas.style.display = "";
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Métricas
+   ------------------------------------------------------------------------- */
 function renderStats() {
   const libros = repoLibros.obtenerTodos();
   const usuarios = repoUsuarios.obtenerTodos();
@@ -50,7 +85,17 @@ function ultimosMeses(cantidad = 6) {
   return meses;
 }
 
-function renderGraficoPrestamos() {
+function renderGraficoPrestamos(animar = true) {
+  const canvas = document.getElementById("grafico-prestamos");
+  if (!canvas) return;
+
+  const holder = canvas.closest(".chart-holder");
+  if (typeof Chart === "undefined") {
+    alternarFallback(holder, true, "El gráfico no está disponible sin conexión.");
+    return;
+  }
+  alternarFallback(holder, false);
+
   const prestamos = repoPrestamos.obtenerTodos();
   const meses = ultimosMeses(6);
 
@@ -58,11 +103,15 @@ function renderGraficoPrestamos() {
     prestamos.filter((p) => p.fechaPrestamo.startsWith(clave)).length
   );
 
-  const ctx = document.getElementById("grafico-prestamos");
-  if (!ctx || typeof Chart === "undefined") return;
+  const resumen = document.querySelector("[data-resumen-prestamos]");
+  if (resumen) {
+    resumen.textContent = `Préstamos por mes: ${meses
+      .map((mes, i) => `${mes.etiqueta} ${conteos[i]}`)
+      .join(", ")}.`;
+  }
 
   if (chartPrestamos) chartPrestamos.destroy();
-  chartPrestamos = new Chart(ctx, {
+  chartPrestamos = new Chart(canvas, {
     type: "bar",
     data: {
       labels: meses.map((m) => m.etiqueta),
@@ -79,6 +128,7 @@ function renderGraficoPrestamos() {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      animation: animar ? undefined : false,
       plugins: { legend: { display: false } },
       scales: {
         x: { grid: { display: false }, ticks: { color: obtenerColorVariable("--text-secondary") } },
@@ -92,7 +142,12 @@ function renderGraficoPrestamos() {
   });
 }
 
-function renderGraficoCategorias() {
+function renderGraficoCategorias(animar = true) {
+  const canvas = document.getElementById("grafico-categorias");
+  const leyenda = document.querySelector("[data-leyenda-categorias]");
+  if (!canvas || !leyenda) return;
+
+  const holder = canvas.closest(".chart-holder");
   const libros = repoLibros.obtenerTodos();
   const prestamos = repoPrestamos.obtenerTodos();
   const porLibro = new Map(libros.map((l) => [l.id, l]));
@@ -105,43 +160,57 @@ function renderGraficoCategorias() {
   });
 
   const entradas = [...conteoPorCategoria.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
-  const ctx = document.getElementById("grafico-categorias");
-  const leyenda = document.querySelector("[data-leyenda-categorias]");
 
   if (entradas.length === 0) {
     leyenda.innerHTML = `<p class="muted">Aún no hay préstamos registrados.</p>`;
+    alternarFallback(holder, true, "Sin préstamos para graficar.");
+    chartCategorias?.destroy();
+    chartCategorias = null;
     return;
   }
 
+  if (typeof Chart === "undefined") {
+    alternarFallback(holder, true, "El gráfico no está disponible sin conexión.");
+    return;
+  }
+  alternarFallback(holder, false);
+
   const colores = entradas.map(([categoria]) => colorPorTexto(categoria));
 
-  if (ctx && typeof Chart !== "undefined") {
-    if (chartCategorias) chartCategorias.destroy();
-    chartCategorias = new Chart(ctx, {
-      type: "doughnut",
-      data: {
-        labels: entradas.map(([categoria]) => categoria),
-        datasets: [{ data: entradas.map(([, conteo]) => conteo), backgroundColor: colores, borderWidth: 0 }],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        cutout: "68%",
-      },
-    });
-  }
+  if (chartCategorias) chartCategorias.destroy();
+  chartCategorias = new Chart(canvas, {
+    type: "doughnut",
+    data: {
+      labels: entradas.map(([categoria]) => categoria),
+      datasets: [{ data: entradas.map(([, conteo]) => conteo), backgroundColor: colores, borderWidth: 0 }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: animar ? undefined : false,
+      plugins: { legend: { display: false } },
+      cutout: "68%",
+    },
+  });
 
+  // escapeHTML: la categoría viene de datos editables por el usuario.
   leyenda.innerHTML = entradas
     .map(
       ([categoria, conteo], i) => `
       <div class="donut-legend__item">
         <span class="donut-legend__swatch" style="background:${colores[i]}"></span>
-        <span>${categoria}</span>
+        <span>${escapeHTML(categoria)}</span>
         <strong>${conteo}</strong>
       </div>`
     )
     .join("");
+
+  const resumen = document.querySelector("[data-resumen-categorias]");
+  if (resumen) {
+    resumen.textContent = `Categorías más prestadas: ${entradas
+      .map(([categoria, conteo]) => `${categoria}, ${conteo} préstamos`)
+      .join("; ")}.`;
+  }
 }
 
 function renderRankingLibros() {
@@ -165,18 +234,35 @@ function renderRankingLibros() {
   }
 
   contenedor.innerHTML = top
-    .map(
-      (item, i) => `
+    .map((item, i) => {
+      const portada = portadaDeLibro(item.libro);
+      const mostrarPortada = portada && !portadasFallidas.has(portada);
+      return `
       <div class="ranking-item">
         <span class="ranking-item__rank">${i + 1}</span>
+        <span class="book-thumb book-thumb--sm" style="--cat-color:${colorPorTexto(item.libro.categoria)}" aria-hidden="true">
+          ${ICONOS.libro}
+          ${mostrarPortada ? `<img src="${escapeHTML(portada)}" alt="" width="30" height="45" loading="lazy" decoding="async" referrerpolicy="no-referrer" data-portada="${escapeHTML(portada)}" />` : ""}
+        </span>
         <div class="ranking-item__body">
           <div class="ranking-item__title">${escapeHTML(truncar(item.libro.titulo, 34))}</div>
           <div class="ranking-item__sub">${escapeHTML(item.libro.autor)}</div>
         </div>
         <span class="ranking-item__count">${item.total} ${item.total === 1 ? "préstamo" : "préstamos"}</span>
-      </div>`
-    )
+      </div>`;
+    })
     .join("");
+
+  contenedor.querySelectorAll("img[data-portada]").forEach((imagen) => {
+    imagen.addEventListener(
+      "error",
+      () => {
+        portadasFallidas.add(imagen.dataset.portada);
+        imagen.remove();
+      },
+      { once: true }
+    );
+  });
 }
 
 function renderRankingUsuarios() {
@@ -214,21 +300,103 @@ function renderRankingUsuarios() {
     .join("");
 }
 
-function renderGraficos() {
-  renderGraficoPrestamos();
-  renderGraficoCategorias();
+function renderGraficos(animar = true) {
+  renderGraficoPrestamos(animar);
+  renderGraficoCategorias(animar);
 }
 
+/* -------------------------------------------------------------------------
+   Datos y respaldo
+   ------------------------------------------------------------------------- */
+function descargarRespaldo() {
+  const respaldo = crearRespaldo();
+  descargarJSON(`biblioteca-respaldo-${hoyISO()}.json`, respaldo);
+  mostrarToast("Respaldo JSON descargado.");
+}
+
+async function importarDesdeArchivo(evento) {
+  const archivo = evento.target.files?.[0];
+  evento.target.value = "";
+  if (!archivo) return;
+
+  let datos;
+  try {
+    datos = JSON.parse(await archivo.text());
+  } catch {
+    mostrarToast("El archivo no contiene un JSON válido.", "error");
+    return;
+  }
+
+  const error = validarRespaldo(datos);
+  if (error) {
+    mostrarToast(error, "error", 5600);
+    return;
+  }
+
+  const ok = await confirmar({
+    titulo: "Importar respaldo",
+    mensaje: `Se reemplazarán los datos actuales por ${datos.libros.length} libros, ${datos.usuarios.length} usuarios y ${datos.prestamos.length} préstamos. Esta acción no se puede deshacer.`,
+    textoConfirmar: "Importar",
+    variante: "primary",
+  });
+  if (!ok) return;
+
+  const errorImportacion = importarRespaldo(datos);
+  if (errorImportacion) {
+    mostrarToast(errorImportacion, "error", 5600);
+    return;
+  }
+
+  mostrarToast("Respaldo importado. Recargando…");
+  setTimeout(() => location.reload(), 700);
+}
+
+async function restaurarDatosEjemplo() {
+  const ok = await confirmar({
+    titulo: "Restaurar datos de ejemplo",
+    mensaje: "Se borrarán todos los libros, usuarios y préstamos actuales y se cargarán los datos de demostración. Esta acción no se puede deshacer.",
+    textoConfirmar: "Restaurar",
+  });
+  if (!ok) return;
+
+  reiniciarDatos();
+  mostrarToast("Datos de ejemplo restaurados. Recargando…");
+  setTimeout(() => location.reload(), 700);
+}
+
+function iniciarRespaldo() {
+  document.querySelector("[data-exportar-respaldo]")?.addEventListener("click", descargarRespaldo);
+
+  const inputArchivo = document.querySelector("[data-archivo-respaldo]");
+  document.querySelector("[data-importar-respaldo]")?.addEventListener("click", () => inputArchivo?.click());
+  inputArchivo?.addEventListener("change", importarDesdeArchivo);
+
+  document.querySelector("[data-restaurar-datos]")?.addEventListener("click", restaurarDatosEjemplo);
+}
+
+/* -------------------------------------------------------------------------
+   Inicialización
+   ------------------------------------------------------------------------- */
 function iniciar() {
   renderStats();
-  renderGraficos();
+  renderGraficos(true);
   renderRankingLibros();
   renderRankingUsuarios();
+  iniciarRespaldo();
+
+  // Otra pestaña modificó los datos: refrescar todo el panel.
+  document.addEventListener("biblioteca:datos-actualizados", (evento) => {
+    if (evento.detail?.clave === "biblioteca_tema") return;
+    renderStats();
+    renderGraficos(false);
+    renderRankingLibros();
+    renderRankingUsuarios();
+  });
 
   // Observar cambios de tema para redibujar gráficos con colores actualizados.
   const observer = new MutationObserver(() => {
     // Esperar un frame para que las CSS custom properties se actualicen.
-    requestAnimationFrame(() => renderGraficos());
+    requestAnimationFrame(() => renderGraficos(false));
   });
   observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 }

@@ -7,7 +7,17 @@
 
 import { repoLibros, repoUsuarios, repoPrestamos, Prestamo } from "./storage.js";
 import { debounce, escapeHTML, formatearFecha, hoyISO, sumarDiasISO, diferenciaDias } from "./utils.js";
-import { abrirModal, cerrarModal, conectarCierreModal, confirmar, mostrarToast, ICONOS } from "./ui.js";
+import {
+  abrirModal,
+  cerrarModal,
+  conectarCierreModal,
+  confirmar,
+  mostrarToast,
+  ICONOS,
+  limpiarErrores,
+  marcarError,
+} from "./ui.js";
+import { exportarTablaPDF } from "./pdf.js";
 
 const estadoTabla = { busqueda: "", estado: "" };
 
@@ -120,14 +130,9 @@ function poblarSelects() {
     selectLibro.innerHTML = `<option value="">No hay libros disponibles</option>`;
   }
 
-  document.querySelector("#campo-fecha-devolucion").value = sumarDiasISO(hoyISO(), 14);
-}
-
-function limpiarErrores(form) {
-  form.querySelectorAll(".field").forEach((campo) => campo.classList.remove("has-error"));
-}
-function marcarError(campoId) {
-  document.querySelector(`#${campoId}`).closest(".field").classList.add("has-error");
+  const campoFecha = document.querySelector("#campo-fecha-devolucion");
+  campoFecha.min = hoyISO();
+  campoFecha.value = sumarDiasISO(hoyISO(), 14);
 }
 
 function abrirFormularioPrestamo() {
@@ -149,9 +154,17 @@ function manejarEnvioPrestamo(evento) {
   const fechaDevolucionEstimada = form.fechaDevolucion.value;
   let valido = true;
 
-  if (!usuarioId) { marcarError("campo-usuario"); valido = false; }
-  if (!libroId) { marcarError("campo-libro"); valido = false; }
-  if (!fechaDevolucionEstimada) { marcarError("campo-fecha-devolucion"); valido = false; }
+  if (!usuarioId || !repoUsuarios.obtenerPorId(usuarioId)) { marcarError("campo-usuario"); valido = false; }
+  if (!libroId || !repoLibros.obtenerPorId(libroId)) { marcarError("campo-libro"); valido = false; }
+
+  if (!fechaDevolucionEstimada) {
+    marcarError("campo-fecha-devolucion");
+    valido = false;
+  } else if (diferenciaDias(hoyISO(), fechaDevolucionEstimada) < 0) {
+    marcarError("campo-fecha-devolucion");
+    valido = false;
+  }
+
   if (!valido) return;
 
   const libro = repoLibros.obtenerPorId(libroId);
@@ -199,46 +212,27 @@ async function manejarDevolucion(id) {
 }
 
 /* -------------------------------------------------------------------------
-   Exportar historial a PDF
+   Exportar historial a PDF (jsPDF se carga solo al pulsar el botón)
    ------------------------------------------------------------------------- */
-function exportarPDF() {
-  if (typeof window.jspdf === "undefined") {
-    mostrarToast("No se pudo cargar el generador de PDF.", "error");
-    return;
-  }
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
+async function exportarPDF() {
   const lista = obtenerFiltrados();
-
-  doc.setFontSize(16);
-  doc.text("Biblioteca — Historial de préstamos", 14, 18);
-  doc.setFontSize(10);
-  doc.setTextColor(110);
-  doc.text(`Generado el ${new Date().toLocaleDateString("es-CL")} · ${lista.length} registros`, 14, 24);
-
-  let y = 36;
-  doc.setFontSize(9);
-  doc.setTextColor(255, 255, 255);
-  doc.setFillColor(154, 43, 59);
-  doc.rect(14, y - 5, 182, 7, "F");
-  doc.text("Libro", 16, y);
-  doc.text("Usuario", 78, y);
-  doc.text("Préstamo", 128, y);
-  doc.text("Estado", 168, y);
-  y += 8;
-
-  doc.setTextColor(30, 30, 30);
-  lista.forEach((p) => {
-    if (y > 280) { doc.addPage(); y = 20; }
-    doc.text(p.libro.titulo.slice(0, 28), 16, y);
-    doc.text(p.usuario.nombre.slice(0, 22), 78, y);
-    doc.text(formatearFecha(p.fechaPrestamo), 128, y);
-    doc.text(p.estado === "devuelto" ? "Devuelto" : "Activo", 168, y);
-    y += 7;
+  await exportarTablaPDF({
+    archivo: "historial-prestamos.pdf",
+    titulo: "Biblioteca — Historial de préstamos",
+    subtitulo: `Generado el ${new Date().toLocaleDateString("es-CL")} · ${lista.length} registros`,
+    columnas: [
+      { titulo: "Libro", ancho: 64 },
+      { titulo: "Usuario", ancho: 50 },
+      { titulo: "Préstamo", ancho: 34 },
+      { titulo: "Estado", ancho: 34 },
+    ],
+    filas: lista.map((p) => [
+      p.libro.titulo,
+      p.usuario.nombre,
+      formatearFecha(p.fechaPrestamo),
+      p.estado === "devuelto" ? "Devuelto" : "Activo",
+    ]),
   });
-
-  doc.save("historial-prestamos.pdf");
-  mostrarToast("PDF generado correctamente.");
 }
 
 /* -------------------------------------------------------------------------
@@ -269,6 +263,8 @@ function iniciar() {
   });
 
   document.querySelector("[data-exportar-pdf]")?.addEventListener("click", exportarPDF);
+
+  document.addEventListener("biblioteca:datos-actualizados", renderTabla);
 }
 
 document.addEventListener("DOMContentLoaded", iniciar);

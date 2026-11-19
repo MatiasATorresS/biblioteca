@@ -1,11 +1,11 @@
 /* ==========================================================================
    BIBLIOTECA — dashboard.css
-   Tarjetas de métricas, layout de gráficos y rankings del panel principal.
+   Tarjetas de métricas, layout de gráficos, rankings y mantenimiento.
    ========================================================================== */
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
   margin-bottom: 24px;
 }
@@ -17,9 +17,14 @@
   padding: 18px 20px;
   position: relative;
   overflow: hidden;
-  transition: transform var(--t-base), box-shadow var(--t-base);
+  min-width: 0;
+  transition: transform var(--t-base), box-shadow var(--t-base), border-color var(--t-base);
 }
-.stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.stat-card:hover { border-color: var(--border-strong); }
+
+@media (hover: hover) {
+  .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+}
 
 .stat-card__top {
   display: flex;
@@ -43,12 +48,6 @@
 .stat-card--teal .stat-card__icon { background: var(--teal-soft); color: var(--teal); }
 .stat-card--amber .stat-card__icon { background: var(--amber-soft); color: var(--amber); }
 
-.stat-card__trend {
-  font-size: 11.5px;
-  font-weight: 600;
-  color: var(--text-tertiary);
-}
-
 .stat-card__value {
   font-size: 30px;
   font-weight: 700;
@@ -64,6 +63,22 @@
   font-weight: 500;
 }
 
+/* Métrica de préstamos del mes dentro de un panel */
+.month-metric { margin-top: 18px; }
+.month-metric__value {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.month-metric__label {
+  margin-top: 4px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
 .dash-grid {
   display: grid;
   grid-template-columns: 1.6fr 1fr;
@@ -72,10 +87,8 @@
   align-items: start;
 }
 
-.chart-panel { min-height: 320px; }
-.chart-panel canvas { max-height: 270px; }
-
 .ranking-list { display: flex; flex-direction: column; gap: 4px; }
+.ranking-list > .muted { padding: 8px 4px; }
 
 .ranking-item {
   display: flex;
@@ -109,7 +122,13 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.ranking-item__sub { font-size: 11.5px; color: var(--text-tertiary); }
+.ranking-item__sub {
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 .ranking-item__count {
   font-size: 12.5px;
@@ -121,7 +140,7 @@
 
 .bottom-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
 }
 
@@ -140,3 +159,32 @@
 }
 .donut-legend__swatch { width: 9px; height: 9px; border-radius: 3px; flex-shrink: 0; }
 .donut-legend__item strong { margin-left: auto; color: var(--text-primary); }
+.donut-legend > .muted { margin-top: 4px; }
+
+/* Panel de datos y respaldo */
+.maintenance { margin-top: 16px; }
+.maintenance__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.maintenance__hint {
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+/* Fallback si Chart.js no carga (sin conexión) */
+.chart-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 150px;
+  padding: 16px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  color: var(--text-tertiary);
+  font-size: 12.5px;
+  text-align: center;
+}

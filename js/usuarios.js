@@ -7,7 +7,16 @@
 
 import { repoUsuarios, repoPrestamos, repoLibros, Usuario } from "./storage.js";
 import { debounce, escapeHTML, validarCorreo, validarTelefono, validarDocumento, formatearDocumento, formatearFecha } from "./utils.js";
-import { abrirModal, cerrarModal, conectarCierreModal, confirmar, mostrarToast, ICONOS } from "./ui.js";
+import {
+  abrirModal,
+  cerrarModal,
+  conectarCierreModal,
+  confirmar,
+  mostrarToast,
+  ICONOS,
+  limpiarErrores,
+  marcarError,
+} from "./ui.js";
 
 let busquedaActual = "";
 let idEnEdicion = null;
@@ -67,13 +76,6 @@ function renderTabla() {
       </tr>`;
     })
     .join("");
-}
-
-function limpiarErrores(form) {
-  form.querySelectorAll(".field").forEach((campo) => campo.classList.remove("has-error"));
-}
-function marcarError(campoId) {
-  document.querySelector(`#${campoId}`).closest(".field").classList.add("has-error");
 }
 
 function validarFormulario(datos) {
@@ -187,6 +189,8 @@ function iniciar() {
     if (boton.dataset.accion === "editar") abrirFormulario(repoUsuarios.obtenerPorId(id));
     if (boton.dataset.accion === "eliminar") manejarEliminar(id);
   });
+
+  document.addEventListener("biblioteca:datos-actualizados", renderTabla);
 }
 
 document.addEventListener("DOMContentLoaded", iniciar);

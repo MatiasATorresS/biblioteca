@@ -1,25 +1,44 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es-CL">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#f7f7f5" />
+  <script>
+    (() => {
+      try {
+        const guardado = localStorage.getItem("biblioteca_tema");
+        const tema = guardado === "dark" || guardado === "light"
+          ? guardado
+          : (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.dataset.theme = tema;
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.content = tema === "dark" ? "#15161a" : "#f7f7f5";
+      } catch { /* almacenamiento deshabilitado */ }
+    })();
+  </script>
   <title>Usuarios · Biblioteca</title>
   <meta name="description" content="Registro de usuarios de la biblioteca: agregar, editar, eliminar y buscar por nombre o documento." />
-  <link rel="canonical" href="https://biblioteca-ejemplo.com/usuarios.html" />
+  <link rel="canonical" href="usuarios.html" />
+  <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg" />
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" />
   <meta property="og:title" content="Usuarios · Biblioteca" />
   <meta property="og:description" content="Registro de usuarios de la biblioteca: agregar, editar, eliminar y buscar por nombre o documento." />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://biblioteca-ejemplo.com/usuarios.html" />
   <meta property="og:site_name" content="Biblioteca Sistema de Gestión" />
   <meta property="og:locale" content="es_CL" />
-  <meta name="twitter:card" content="summary" />
+  <meta property="og:image" content="https://biblioteca-ejemplo.com/assets/images/og-cover.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Biblioteca: catálogo de libros, usuarios y préstamos" />
+  <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Usuarios · Biblioteca" />
   <meta name="twitter:description" content="Registro de usuarios de la biblioteca: agregar, editar, eliminar y buscar." />
+  <meta name="twitter:image" content="https://biblioteca-ejemplo.com/assets/images/og-cover.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Source+Sans+3:wght@400;500;600;700&display=swap" />
   <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/dashboard.css" />
   <link rel="stylesheet" href="css/forms.css" />
   <link rel="stylesheet" href="css/responsive.css" />
 </head>
@@ -41,31 +60,32 @@
 
       <nav class="sidebar__nav" aria-label="Navegación principal">
         <a class="sidebar__link" href="dashboard.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
           Dashboard
         </a>
         <a class="sidebar__link" href="libros.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
           Libros
         </a>
         <a class="sidebar__link" href="usuarios.html" aria-current="page">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           Usuarios
         </a>
         <a class="sidebar__link" href="prestamos.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
           Préstamos
         </a>
       </nav>
 
       <div class="sidebar__footer">
-        <button class="theme-toggle" data-theme-toggle type="button" aria-pressed="false">
-          <span class="theme-toggle__icons">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <button class="theme-toggle" data-theme-toggle type="button" aria-pressed="false" aria-label="Cambiar a modo oscuro">
+          <span class="theme-toggle__icons" aria-hidden="true">
+            <svg class="theme-icon theme-icon--sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+            <svg class="theme-icon theme-icon--moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
           </span>
           <span data-theme-label>Modo claro</span>
         </button>
-        <p style="margin-top:10px;font-size:11px;color:var(--text-tertiary)">© <span data-anio-actual></span> Biblioteca</p>
+        <p class="footer-note">© <span data-anio-actual></span> Biblioteca</p>
       </div>
     </aside>
 
@@ -73,9 +93,9 @@
 
     <div class="main">
       <header class="topbar">
-        <div style="display:flex;align-items:center;gap:10px;">
+        <div class="topbar__left">
           <button class="sidebar-toggle" data-sidebar-toggle type="button" aria-label="Abrir menú de navegación" aria-expanded="false" aria-controls="sidebar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
           </button>
           <div class="topbar__heading">
             <span class="eyebrow">Registro</span>
@@ -83,9 +103,15 @@
           </div>
         </div>
         <div class="topbar__actions">
+          <button class="theme-toggle theme-toggle--icon" data-theme-toggle type="button" aria-pressed="false" aria-label="Cambiar a modo oscuro">
+            <span class="theme-toggle__icons" aria-hidden="true">
+              <svg class="theme-icon theme-icon--sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+              <svg class="theme-icon theme-icon--moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+            </span>
+          </button>
           <button class="btn btn--primary btn--sm" data-abrir-modal-usuario type="button" aria-label="Registrar un nuevo usuario">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-            Registrar usuario
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            <span class="btn__label">Registrar usuario</span>
           </button>
         </div>
       </header>
@@ -94,24 +120,24 @@
         <div class="panel fade-in">
           <div class="toolbar">
             <div class="search-field">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
               <input type="search" data-usuarios-buscar placeholder="Buscar por nombre, documento o correo…" aria-label="Buscar usuarios" />
             </div>
             <div class="toolbar-spacer"></div>
-            <span class="muted" data-usuarios-contador id="usuarios-contador-info" aria-live="polite" aria-atomic="true" style="font-size:12.5px;color:var(--text-tertiary);"></span>
+            <span class="muted" data-usuarios-contador id="usuarios-contador-info" aria-live="polite" aria-atomic="true"></span>
           </div>
 
           <div class="table-wrap" role="region" aria-label="Tabla de usuarios">
             <table class="data-table" aria-describedby="usuarios-contador-info">
               <thead>
                 <tr>
-                  <th>Nombre</th>
-                  <th>Documento</th>
-                  <th>Correo</th>
-                  <th>Teléfono</th>
-                  <th>Registrado</th>
-                  <th>Préstamos activos</th>
-                  <th class="col-actions">Acciones</th>
+                  <th scope="col">Nombre</th>
+                  <th scope="col">Documento</th>
+                  <th scope="col">Correo</th>
+                  <th scope="col">Teléfono</th>
+                  <th scope="col">Registrado</th>
+                  <th scope="col">Préstamos activos</th>
+                  <th scope="col" class="col-actions">Acciones</th>
                 </tr>
               </thead>
               <tbody data-usuarios-cuerpo></tbody>
@@ -119,7 +145,7 @@
           </div>
 
           <div class="empty-state" data-usuarios-vacio hidden>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
             <h3>No se encontraron usuarios</h3>
             <p>Ajusta la búsqueda o registra un nuevo usuario.</p>
           </div>
@@ -127,6 +153,25 @@
       </main>
     </div>
   </div>
+
+  <nav class="tabbar" aria-label="Navegación móvil">
+    <a class="tabbar__link" href="dashboard.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+      <span>Panel</span>
+    </a>
+    <a class="tabbar__link" href="libros.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
+      <span>Libros</span>
+    </a>
+    <a class="tabbar__link" href="usuarios.html" aria-current="page">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>Usuarios</span>
+    </a>
+    <a class="tabbar__link" href="prestamos.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
+      <span>Préstamos</span>
+    </a>
+  </nav>
 
   <!-- Modal: alta / edición de usuario -->
   <div class="modal-overlay" id="modal-usuario" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-usuario-titulo">
@@ -137,14 +182,14 @@
           <p>Completa los datos del usuario</p>
         </div>
         <button class="modal__close" type="button" data-cerrar-modal aria-label="Cerrar">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
         </button>
       </div>
       <form id="form-usuario" novalidate>
         <div class="modal__body">
           <div class="field">
             <label for="campo-nombre">Nombre completo</label>
-            <input type="text" id="campo-nombre" name="nombre" placeholder="Ej: Camila Reyes Muñoz" autocomplete="off" />
+            <input type="text" id="campo-nombre" name="nombre" placeholder="Ej: Camila Reyes Muñoz" autocomplete="name" />
             <span class="field__error">Ingresa el nombre completo (mínimo 3 caracteres).</span>
           </div>
           <div class="field">
@@ -155,12 +200,12 @@
           <div class="field-row">
             <div class="field">
               <label for="campo-correo">Correo</label>
-              <input type="email" id="campo-correo" name="correo" placeholder="nombre@correo.cl" autocomplete="off" />
+              <input type="email" id="campo-correo" name="correo" placeholder="nombre@correo.cl" autocomplete="email" inputmode="email" />
               <span class="field__error">Ingresa un correo válido.</span>
             </div>
             <div class="field">
               <label for="campo-telefono">Teléfono</label>
-              <input type="tel" id="campo-telefono" name="telefono" placeholder="+56 9 1234 5678" autocomplete="off" />
+              <input type="tel" id="campo-telefono" name="telefono" placeholder="+56 9 1234 5678" autocomplete="tel" inputmode="tel" />
               <span class="field__error">Ingresa un teléfono válido.</span>
             </div>
           </div>
@@ -175,13 +220,13 @@
 
   <!-- Modal: confirmación genérica (eliminar, etc.) -->
   <div class="modal-overlay" id="modal-confirmar" aria-hidden="true" role="alertdialog" aria-modal="true" aria-labelledby="confirmar-titulo-h">
-    <div class="modal modal--sm">
-      <div class="modal__body" style="padding-top:22px;">
-        <div class="confirm-icon">
+    <div class="modal modal--sm modal--confirmar">
+      <div class="modal__body">
+        <div class="confirm-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.3 3.86 1.8 18a1.5 1.5 0 0 0 1.3 2.25h17.8A1.5 1.5 0 0 0 22.2 18L13.7 3.86a1.5 1.5 0 0 0-2.6 0Z"/></svg>
         </div>
-        <h2 id="confirmar-titulo-h" data-confirmar-titulo style="font-size:16px;font-weight:700;margin-bottom:6px;">Confirmar</h2>
-        <p data-confirmar-mensaje style="font-size:13.5px;color:var(--text-secondary);"></p>
+        <h2 id="confirmar-titulo-h" data-confirmar-titulo>Confirmar</h2>
+        <p data-confirmar-mensaje></p>
       </div>
       <div class="modal__footer">
         <button type="button" class="btn btn--secondary" data-cerrar-modal>Cancelar</button>

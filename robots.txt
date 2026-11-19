@@ -4,13 +4,14 @@
 User-agent: *
 Allow: /
 
-# Bloquear acceso a archivos de datos y configuración
+# Solo se excluyen los datos locales; CSS y JS son necesarios para
+# renderizar las páginas y deben poder rastrearse.
 Disallow: /data/
-Disallow: /js/
-Disallow: /css/
 
-# Permitir acceso a páginas HTML y assets públicos
+# Permitir explícitamente los recursos públicos
 Allow: /assets/
+Allow: /css/
+Allow: /js/
 
 # Sitemap
 Sitemap: https://biblioteca-ejemplo.com/sitemap.xml

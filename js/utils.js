@@ -125,3 +125,118 @@ export function colorPorTexto(texto = "") {
   for (let i = 0; i < texto.length; i++) hash = (hash * 31 + texto.charCodeAt(i)) >>> 0;
   return PALETA_CATEGORIAS[hash % PALETA_CATEGORIAS.length];
 }
+
+/** Descarga un objeto como archivo JSON con nombre y fecha. */
+export function descargarJSON(nombre, datos) {
+  const blob = new Blob([JSON.stringify(datos, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const enlace = document.createElement("a");
+  enlace.href = url;
+  enlace.download = nombre;
+  document.body.appendChild(enlace);
+  enlace.click();
+  enlace.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/* -------------------------------------------------------------------------
+   Portadas de libros
+   ------------------------------------------------------------------------- */
+
+/**
+ * URL de portada en Open Library a partir del ISBN. `default=false` hace que
+ * la imagen devuelva 404 cuando no existe, en vez de un recuadro vacío.
+ */
+export function portadaOpenLibrary(isbn) {
+  const limpio = String(isbn ?? "").replace(/[-\s]/g, "");
+  if (!limpio) return "";
+  return `https://covers.openlibrary.org/b/isbn/${encodeURIComponent(limpio)}-M.jpg?default=false`;
+}
+
+/** URL de portada de Open Library a partir del id de imagen (`cover_i`). */
+export function portadaOpenLibraryId(id) {
+  const limpio = String(id ?? "").trim();
+  if (!limpio) return "";
+  return `https://covers.openlibrary.org/b/id/${encodeURIComponent(limpio)}-M.jpg?default=false`;
+}
+
+/** Devuelve la portada guardada o la busca por ISBN como respaldo. */
+export function portadaDeLibro(libro) {
+  if (!libro) return "";
+  if (libro.portadaAuto === false) return "";
+  if (typeof libro.portada === "string" && libro.portada.trim()) return libro.portada.trim();
+  return libro.isbn ? portadaOpenLibrary(libro.isbn) : "";
+}
+
+/** Valida una portada: vacía, data URL de imagen, http(s) o ruta local. */
+export function esPortadaValida(valor) {
+  const texto = String(valor ?? "").trim();
+  if (!texto) return true;
+  if (/^data:image\/(png|jpe?g|webp|gif|avif);base64,[a-z0-9+/=\s]+$/i.test(texto)) return true;
+  if (/^https?:\/\/[^\s]+$/i.test(texto)) return true;
+  return /^(?:\.{1,2}\/|\/)?(?:assets|images)\/[^\s]+$/i.test(texto);
+}
+
+/**
+ * Lee un archivo de imagen, la recorta al centro en formato 2:3 y la
+ * comprime a WebP (o JPEG como respaldo) para guardarla en LocalStorage.
+ */
+export async function comprimirImagen(archivo, { ancho = 300, alto = 450, calidad = 0.82 } = {}) {
+  if (!archivo || !String(archivo.type).startsWith("image/")) {
+    throw new Error("El archivo seleccionado no es una imagen.");
+  }
+
+  const fuente = await cargarImagen(archivo);
+  const lienzo = document.createElement("canvas");
+  lienzo.width = ancho;
+  lienzo.height = alto;
+  const ctx = lienzo.getContext("2d");
+  if (!ctx) throw new Error("El navegador no pudo procesar la imagen.");
+
+  // Recorte central tipo object-fit: cover, para respetar la proporción 2:3.
+  const escala = Math.max(ancho / fuente.width, alto / fuente.height);
+  const dibujoAncho = fuente.width * escala;
+  const dibujoAlto = fuente.height * escala;
+  ctx.drawImage(
+    fuente,
+    (ancho - dibujoAncho) / 2,
+    (alto - dibujoAlto) / 2,
+    dibujoAncho,
+    dibujoAlto
+  );
+  fuente.close?.();
+
+  const webp = lienzo.toDataURL("image/webp", calidad);
+  if (webp.startsWith("data:image/webp")) return webp;
+
+  // Respaldo para navegadores sin WebP: fondo blanco + JPEG.
+  const respaldo = document.createElement("canvas");
+  respaldo.width = ancho;
+  respaldo.height = alto;
+  const ctxRespaldo = respaldo.getContext("2d");
+  ctxRespaldo.fillStyle = "#ffffff";
+  ctxRespaldo.fillRect(0, 0, ancho, alto);
+  ctxRespaldo.drawImage(lienzo, 0, 0);
+  return respaldo.toDataURL("image/jpeg", calidad);
+}
+
+async function cargarImagen(archivo) {
+  if ("createImageBitmap" in window) {
+    try {
+      return await createImageBitmap(archivo, { imageOrientation: "from-image" });
+    } catch {
+      // Continúa con el método clásico.
+    }
+  }
+
+  const url = URL.createObjectURL(archivo);
+  try {
+    const img = new Image();
+    img.decoding = "async";
+    img.src = url;
+    await img.decode();
+    return img;
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
