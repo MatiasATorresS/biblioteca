@@ -542,7 +542,11 @@ table.data-table { font-size: 13.5px; }
   vertical-align: middle;
 }
 .data-table tbody tr:last-child td { border-bottom: none; }
-.data-table tbody tr { transition: background var(--t-fast); }
+.data-table tbody tr {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 54px;
+  transition: background var(--t-fast);
+}
 .data-table tbody tr:hover { background: var(--bg-hover); }
 .data-table .col-actions { text-align: right; white-space: nowrap; }
 .data-table strong { font-weight: 600; }

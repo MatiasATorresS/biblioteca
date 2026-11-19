@@ -235,7 +235,7 @@ function renderRankingLibros() {
 
   contenedor.innerHTML = top
     .map((item, i) => {
-      const portada = portadaDeLibro(item.libro);
+      const portada = portadaDeLibro(item.libro, "S");
       const mostrarPortada = portada && !portadasFallidas.has(portada);
       return `
       <div class="ranking-item">

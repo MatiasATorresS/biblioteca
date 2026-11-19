@@ -112,7 +112,7 @@ function renderTabla() {
         libro.estado === "prestado"
           ? `<span class="stamp">Prestado</span>`
           : `<span class="badge badge--teal">Disponible</span>`;
-      const portada = portadaDeLibro(libro);
+      const portada = portadaDeLibro(libro, "S");
       const mostrarPortada = portada && !portadasFallidas.has(portada);
       return `
         <tr data-id="${libro.id}">

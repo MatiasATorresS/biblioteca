@@ -144,28 +144,38 @@ export function descargarJSON(nombre, datos) {
    ------------------------------------------------------------------------- */
 
 /**
- * URL de portada en Open Library a partir del ISBN. `default=false` hace que
- * la imagen devuelva 404 cuando no existe, en vez de un recuadro vacío.
+ * URL de portada en Open Library a partir del ISBN.
+ * tamaño: 'S' (~40x60, ~1.6KB, ideal para miniaturas), 'M' (~180x270, ~17KB, modales) o 'L'.
+ * `default=false` hace que la imagen devuelva 404 cuando no existe, en vez de un recuadro vacío.
  */
-export function portadaOpenLibrary(isbn) {
+export function portadaOpenLibrary(isbn, tamano = "M") {
   const limpio = String(isbn ?? "").replace(/[-\s]/g, "");
   if (!limpio) return "";
-  return `https://covers.openlibrary.org/b/isbn/${encodeURIComponent(limpio)}-M.jpg?default=false`;
+  const t = ["S", "M", "L"].includes(tamano?.toUpperCase()) ? tamano.toUpperCase() : "M";
+  return `https://covers.openlibrary.org/b/isbn/${encodeURIComponent(limpio)}-${t}.jpg?default=false`;
 }
 
 /** URL de portada de Open Library a partir del id de imagen (`cover_i`). */
-export function portadaOpenLibraryId(id) {
+export function portadaOpenLibraryId(id, tamano = "M") {
   const limpio = String(id ?? "").trim();
   if (!limpio) return "";
-  return `https://covers.openlibrary.org/b/id/${encodeURIComponent(limpio)}-M.jpg?default=false`;
+  const t = ["S", "M", "L"].includes(tamano?.toUpperCase()) ? tamano.toUpperCase() : "M";
+  return `https://covers.openlibrary.org/b/id/${encodeURIComponent(limpio)}-${t}.jpg?default=false`;
 }
 
 /** Devuelve la portada guardada o la busca por ISBN como respaldo. */
-export function portadaDeLibro(libro) {
+export function portadaDeLibro(libro, tamano = "M") {
   if (!libro) return "";
   if (libro.portadaAuto === false) return "";
-  if (typeof libro.portada === "string" && libro.portada.trim()) return libro.portada.trim();
-  return libro.isbn ? portadaOpenLibrary(libro.isbn) : "";
+  if (typeof libro.portada === "string" && libro.portada.trim()) {
+    // Si la portada proviene de Open Library, se puede adaptar el tamaño solicitado
+    const url = libro.portada.trim();
+    if (tamano === "S" && /^https:\/\/covers\.openlibrary\.org\//i.test(url)) {
+      return url.replace(/-[ML]\.jpg/i, "-S.jpg");
+    }
+    return url;
+  }
+  return libro.isbn ? portadaOpenLibrary(libro.isbn, tamano) : "";
 }
 
 /** Valida una portada: vacía, data URL de imagen, http(s) o ruta local. */
@@ -179,9 +189,10 @@ export function esPortadaValida(valor) {
 
 /**
  * Lee un archivo de imagen, la recorta al centro en formato 2:3 y la
- * comprime a WebP (o JPEG como respaldo) para guardarla en LocalStorage.
+ * comprime a WebP (o JPEG como respaldo) para guardarla en LocalStorage
+ * de forma ultra liviana (~8-15KB en vez de 70KB).
  */
-export async function comprimirImagen(archivo, { ancho = 300, alto = 450, calidad = 0.82 } = {}) {
+export async function comprimirImagen(archivo, { ancho = 200, alto = 300, calidad = 0.78 } = {}) {
   if (!archivo || !String(archivo.type).startsWith("image/")) {
     throw new Error("El archivo seleccionado no es una imagen.");
   }
