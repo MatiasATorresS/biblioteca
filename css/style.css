@@ -97,7 +97,13 @@
    2. Reset
    ------------------------------------------------------------------------- */
 *, *::before, *::after { box-sizing: border-box; }
-html, body { min-height: 100%; }
+html, body {
+  min-height: 100%;
+}
+.app-shell {
+  display: flex;
+  min-height: 100dvh;
+}
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
